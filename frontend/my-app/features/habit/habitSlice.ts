@@ -3,7 +3,7 @@ import { fetchHabits } from "./habitAPI";
 
 type Habit = {
   id: string;
-  name: string;
+  title: string;
   description: string;
   createdAt: string;
 };
