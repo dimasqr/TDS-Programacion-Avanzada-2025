@@ -1,7 +1,7 @@
 interface Habit {
   id: string;
   title: string;
-  description: number;
+  description: string;
   createdAt: string;
 }
 
