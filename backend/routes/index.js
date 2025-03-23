@@ -64,7 +64,7 @@ router.put("/habits/:id", async (req, res) => {
   }
 });
 
-router.patch("/habits/markasdone:id", async (req, res) => {
+router.patch("/habits/markasdone/:id", async (req, res) => {
   try {
     const habit = await Habit.findById(req.params.id);
     habit.lastDone = new Date();
@@ -72,12 +72,13 @@ router.patch("/habits/markasdone:id", async (req, res) => {
       habit.lastUpdated = new Date();
       habit.days = timeDifferenceInDays(habit.lastDone, habit.startedAt);
       habit.save();
-      res.status(200).json({ menssage: "Habit marked as done" });
+      res.status(200).json({ message: "Habit marked as done" });
     } else {
       habit.days = 1;
       habit.lastUpdated = new Date();
       habit.startedAt = new Date();
-      res.status(200).json({ menssage: "Habit restarted" });
+      habit.save();
+      res.status(200).json({ message: "Habit restarted" });
     }
   } catch (err) {
     res.status(500).json({ message: "Error updating habit" });

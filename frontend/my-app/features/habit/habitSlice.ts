@@ -2,18 +2,28 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { fetchHabits } from "./habitAPI";
 
 type Habit = {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   createdAt: string;
+  days: number;
+  lastDone: Date;
+  lastUpdated: Date;
 };
 
 type HabitState = {
   habits: Habit[];
+  status: Record<
+    string,
+    "idle" | "loading" | "failed" | "succeeded" | "failed"
+  >;
+  error: Record<string, string | null>;
 };
 
 const initialState: HabitState = {
   habits: [],
+  status: {},
+  error: {},
 };
 
 export const fetchHabitsThunk = createAsyncThunk(
@@ -22,6 +32,27 @@ export const fetchHabitsThunk = createAsyncThunk(
     return await fetchHabits();
   }
 );
+
+export const markAsDoneThunk = createAsyncThunk(
+  "habit/markAsDone",
+  async (habitId: string, { rejectWithValue }) => {
+    const response = await fetch(
+      `http://localhost:3001/habits/markAsDone/${habitId}`,
+      {
+        method: "PATCH",
+      }
+    );
+    const responseJson = await response.json();
+    if (!response.ok) {
+      return rejectWithValue("Failed to mark habit as done");
+    } else if (responseJson.message.toString() === "Habit restarted") {
+      return rejectWithValue(responseJson.message);
+    } else {
+      return responseJson.message;
+    }
+  }
+);
+
 const habitSlice = createSlice({
   name: "habit",
   initialState,
@@ -34,14 +65,23 @@ const habitSlice = createSlice({
     },
     removeHabit: (state, action) => {
       state.habits = state.habits.filter(
-        (habit) => habit.id !== action.payload
+        (habit) => habit._id !== action.payload
       );
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchHabitsThunk.fulfilled, (state, action) => {
-      state.habits = action.payload;
-    });
+    builder
+      .addCase(fetchHabitsThunk.fulfilled, (state, action) => {
+        state.habits = action.payload;
+      })
+      .addCase(markAsDoneThunk.fulfilled, (state, action) => {
+        state.status[action.meta.arg] = "succeeded";
+        state.error[action.meta.arg] = null;
+      })
+      .addCase(markAsDoneThunk.rejected, (state, action) => {
+        state.status[action.meta.arg] = "failed";
+        state.error[action.meta.arg] = action.payload as string;
+      });
   },
 });
 
