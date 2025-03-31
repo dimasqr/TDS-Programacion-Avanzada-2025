@@ -1,17 +1,51 @@
 var express = require("express");
 var router = express.Router();
 const Habit = require("../models/Habit");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+const cors = require("cors"); // Import CORS
+
+// Enable CORS for this router
+router.use(
+  cors({
+    origin: "http://localhost:3000", // Allow requests from the frontend
+    credentials: true, // Allow credentials (cookies, etc.)
+  })
+);
+
+const authenticateToken = (req, res, next) => {
+  const token = req.header("Authorization");
+  if (!token) return res.status(401).json({ message: "Access denied." });
+
+  try {
+    const tokenWithoutBearer = token.replace("Bearer ", "");
+    const verified = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
+    req.user = verified;
+    next();
+  } catch (error) {
+    console.error(error);
+    return res.status(403).json({ message: "Invalid token." });
+  }
+};
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 
-router.get("/habits", async (req, res) => {
+router.get("/habits", authenticateToken, async (req, res) => {
   try {
-    const habits = await Habit.find();
+    let userId =
+      req.user && req.user.userId
+        ? req.user.userId
+        : res.status(500).json({ messaage: "Error retrieving habits" });
+    console.log(req.user.userId);
+    const habits = await Habit.find({
+      userId: new mongoose.Types.ObjectId(userId),
+    });
     res.json(habits);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Error retrieving habits" });
   }
 });
@@ -19,10 +53,16 @@ router.get("/habits", async (req, res) => {
 // ############################################### //
 //                  Endpoint Altas                 //
 // ############################################### //
-router.post("/habits", async (req, res) => {
+router.post("/habits", authenticateToken, async (req, res) => {
   try {
-    const { title, description } = req.body;
-    const habit = new Habit({ title, description });
+    console.log(req.body);
+    let { title, description } = req.body;
+    let userId =
+      req.user && req.user.userId
+        ? req.user.userId
+        : res.status(500).json({ message: "Error adding habits" });
+    userId = new mongoose.Types.ObjectId(userId);
+    const habit = new Habit({ title, description, userId });
     await habit.save();
     res.json(habit);
   } catch (err) {
@@ -33,7 +73,7 @@ router.post("/habits", async (req, res) => {
 // ############################################### //
 //                  Endpoint Bajas                 //
 // ############################################### //
-router.delete("/habits/:id", async (req, res) => {
+router.delete("/habits/:id", authenticateToken, async (req, res) => {
   try {
     await Habit.findByIdAndDelete(req.params.id);
     res.json({ message: "Habit deleted" });
@@ -45,7 +85,7 @@ router.delete("/habits/:id", async (req, res) => {
 // ############################################### //
 //                  Endpoint Cambios               //
 // ############################################### //
-router.put("/habits/:id", async (req, res) => {
+router.put("/habits/:id", authenticateToken, async (req, res) => {
   try {
     const { title, description } = req.body;
     const updatedHabit = await Habit.findByIdAndUpdate(
@@ -64,7 +104,7 @@ router.put("/habits/:id", async (req, res) => {
   }
 });
 
-router.patch("/habits/markasdone/:id", async (req, res) => {
+router.patch("/habits/markasdone/:id", authenticateToken, async (req, res) => {
   try {
     const habit = await Habit.findById(req.params.id);
     habit.lastDone = new Date();

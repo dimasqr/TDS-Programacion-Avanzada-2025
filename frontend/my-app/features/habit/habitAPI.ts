@@ -1,7 +1,40 @@
-export const fetchHabits = async () => {
-  const response = await fetch("http://localhost:3001/habits");
+export const fetchHabits = async (token: string) => {
+  const response = await fetch("http://localhost:3001/habits", {
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+    credentials: "include", // Add this line
+  });
+
   if (!response.ok) {
     throw new Error("Failed to fetch habits");
   }
-  return response.json();
+
+  return response;
+};
+
+export const fetchAddHabit = async (
+  token: string,
+  title: string,
+  description: string
+) => {
+  const response = await fetch("http://localhost:3001/habits", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: title,
+      description: description,
+    }),
+    credentials: "include", // Add this line
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to add habit");
+  }
+
+  return response;
 };
