@@ -79,7 +79,7 @@ export const fetchAddHabitThunk = createAsyncThunk(
     const response = await fetchAddHabit(token, title, description);
     const responseJson = await response.json();
     if (!response.ok) {
-      return rejectWithValue("Failed to add Habit.");
+      return rejectWithValue("Failed to add Habit");
     } else if (responseJson.message.toString() === "Error creating habit") {
       return rejectWithValue(responseJson.message);
     } else {

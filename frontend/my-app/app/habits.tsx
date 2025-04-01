@@ -27,9 +27,7 @@ const handleMarkAsDone = (
   token: string
 ) => {
   dispatch(markAsDoneThunk({ habitId, token }));
-  if (token) {
-    dispatch(fetchHabitsThunk(token));
-  }
+  dispatch(fetchHabitsThunk(token));
 };
 
 export default function Habits({ habits }: HabitsProps) {
@@ -48,7 +46,7 @@ export default function Habits({ habits }: HabitsProps) {
     if (title && description) {
       dispatch(
         fetchAddHabitThunk({
-          token: user ? user.toString() : "",
+          token: user?.toString() || "",
           title,
           description,
         })

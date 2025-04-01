@@ -9,7 +9,7 @@ import {
   fetchRegisterUserThunk,
   fetchLoginUserThunk,
   addUser,
-} from "../features/user/userSlice";
+} from "@/features/user/userSlice";
 import { getCookie } from "cookies-next";
 
 export default function Home() {

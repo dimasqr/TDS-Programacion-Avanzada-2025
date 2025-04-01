@@ -10,15 +10,12 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 
 var app = express();
-
-// CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:3000", // Frontend URL
-    credentials: true, // Allow credentials (cookies, HTTP authentication)
+    origin: "http://localhost:3000",
+    credentials: true,
   })
 );
-
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");

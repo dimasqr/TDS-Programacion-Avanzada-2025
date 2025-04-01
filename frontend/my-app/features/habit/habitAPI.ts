@@ -1,16 +1,10 @@
 export const fetchHabits = async (token: string) => {
   const response = await fetch("http://localhost:3001/habits", {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + token,
-    },
-    credentials: "include", // Add this line
+    headers: { Authorization: "Bearer " + token },
   });
-
   if (!response.ok) {
     throw new Error("Failed to fetch habits");
   }
-
   return response;
 };
 
@@ -25,16 +19,10 @@ export const fetchAddHabit = async (
       Authorization: "Bearer " + token,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      title: title,
-      description: description,
-    }),
-    credentials: "include", // Add this line
+    body: JSON.stringify({ title: title, description: description }),
   });
-
   if (!response.ok) {
-    throw new Error("Failed to add habit");
+    throw new Error("Failed to fetch habits");
   }
-
   return response;
 };

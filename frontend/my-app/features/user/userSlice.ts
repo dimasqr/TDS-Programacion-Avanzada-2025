@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchRegisterUser, fetchLoginUser } from "./userAPI";
+import { error } from "console";
 
 interface userThunk {
   username: string;
@@ -18,12 +19,12 @@ const initialState: userState = {
   status: "idle",
   error: null,
 };
+
 export const fetchRegisterUserThunk = createAsyncThunk(
   "user/fetchRegisterUser",
   async ({ username, password }: userThunk, { rejectWithValue }) => {
     const response = await fetchRegisterUser(username, password);
     const responseJson = await response.json();
-    console.log(responseJson.message.toString());
     if (!response.ok) {
       return rejectWithValue("Failed to register user");
     } else if (
@@ -42,7 +43,7 @@ export const fetchLoginUserThunk = createAsyncThunk(
     const response = await fetchLoginUser(username, password);
     const responseJson = await response.json();
     if (!response.ok) {
-      throw new Error("Failed to login user");
+      return rejectWithValue("Failed to Login user");
     } else if (responseJson.message.toString() === "Login sucessful") {
       return responseJson.token;
     } else {
@@ -65,23 +66,25 @@ const userSlice = createSlice({
         state.status = "success";
         state.user = null;
         state.error = action.payload as string;
-        alert("User successfully created.");
+        alert("User successfully created");
       })
       .addCase(fetchRegisterUserThunk.rejected, (state, action) => {
         state.status = "failed";
         state.user = null;
         state.error = action.payload as string;
-        alert("Couldn't register user at this moment. Please try again later.");
+        alert("Failed to register user");
       })
       .addCase(fetchLoginUserThunk.rejected, (state, action) => {
         state.status = "failed";
+        state.user = null;
         state.error = action.payload as string;
-        alert("Unable to login.");
+        alert("Unable to login user at this moment, please try again later");
       })
       .addCase(fetchLoginUserThunk.fulfilled, (state, action) => {
         state.status = "success";
-        state.user = action.payload;
-        state.error = action.payload as string;
+        state.user = action.payload as user;
+        state.error = null;
+        alert("Login sucessful");
       });
   },
 });

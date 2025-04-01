@@ -3,19 +3,15 @@ var router = express.Router();
 const Habit = require("../models/Habit");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const cors = require("cors"); // Import CORS
-
-// Enable CORS for this router
-router.use(
-  cors({
-    origin: "http://localhost:3000", // Allow requests from the frontend
-    credentials: true, // Allow credentials (cookies, etc.)
-  })
-);
 
 const authenticateToken = (req, res, next) => {
   const token = req.header("Authorization");
-  if (!token) return res.status(401).json({ message: "Access denied." });
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ message: "Token not provided. Access Denied." });
+  }
 
   try {
     const tokenWithoutBearer = token.replace("Bearer ", "");
@@ -23,8 +19,7 @@ const authenticateToken = (req, res, next) => {
     req.user = verified;
     next();
   } catch (error) {
-    console.error(error);
-    return res.status(403).json({ message: "Invalid token." });
+    return res.status(403).json({ message: "Invalid token" });
   }
 };
 
@@ -38,14 +33,12 @@ router.get("/habits", authenticateToken, async (req, res) => {
     let userId =
       req.user && req.user.userId
         ? req.user.userId
-        : res.status(500).json({ messaage: "Error retrieving habits" });
-    console.log(req.user.userId);
+        : res.status(500).json({ message: "Error retreiving habit." });
     const habits = await Habit.find({
       userId: new mongoose.Types.ObjectId(userId),
     });
     res.json(habits);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Error retrieving habits" });
   }
 });
@@ -55,14 +48,17 @@ router.get("/habits", authenticateToken, async (req, res) => {
 // ############################################### //
 router.post("/habits", authenticateToken, async (req, res) => {
   try {
-    console.log(req.body);
-    let { title, description } = req.body;
-    let userId =
-      req.user && req.user.userId
-        ? req.user.userId
-        : res.status(500).json({ message: "Error adding habits" });
-    userId = new mongoose.Types.ObjectId(userId);
+    const { title, description } = req.body;
+
+    if (!req.user || !req.user.userId) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Missing user ID." });
+    }
+
+    const userId = new mongoose.Types.ObjectId(req.user.userId);
     const habit = new Habit({ title, description, userId });
+
     await habit.save();
     res.json(habit);
   } catch (err) {
