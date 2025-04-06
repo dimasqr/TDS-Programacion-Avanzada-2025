@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.js"
+    }
+  ],
+  "env": {
+    "PORT": "3001",
+    "MONGO_URI": "mongodb+srv://dimasquintana1:N26I3vNe2n0X2NDe@cluster0.gg1mo.mongodb.net/habitosApp?retryWrites=true&w=majority&appName=Cluster0",
+    "JWT_SECRET": "Programación Avanzada",
+    "NODE_ENV": "development"
+  }
+}
