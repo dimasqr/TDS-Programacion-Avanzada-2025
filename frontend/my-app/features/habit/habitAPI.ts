@@ -1,7 +1,10 @@
 export const fetchHabits = async (token: string) => {
-  const response = await fetch("http://localhost:3001/habits", {
-    headers: { Authorization: "Bearer " + token },
-  });
+  const response = await fetch(
+    "https://habits-tracker-backend-theta.vercel.app/habits",
+    {
+      headers: { Authorization: "Bearer " + token },
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch habits");
   }
@@ -13,14 +16,17 @@ export const fetchAddHabit = async (
   title: string,
   description: string
 ) => {
-  const response = await fetch("http://localhost:3001/habits", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ title: title, description: description }),
-  });
+  const response = await fetch(
+    "https://habits-tracker-backend-theta.vercel.app/habits",
+    {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title: title, description: description }),
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch habits");
   }
